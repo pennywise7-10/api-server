@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database Viewer - API Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .db-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.03);
+        }
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: left;
+        }
+        th {
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status-expired { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .status-deleted { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-button">
+            <a href="/" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+        
+        <h1><i class="fas fa-database"></i> Database Viewer</h1>
+        
+        <div class="db-section">
+            <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
+            <div id="stats"></div>
+        </div>
+        
+        <div class="db-section">
+            <h2><i class="fas fa-key"></i> API Keys</h2>
+            <div class="table-container">
+                <table id="keysTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>API Key</th>
+                            <th>Expiry Date</th>
+                            <th>Created</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keysBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="db-section">
+            <h2><i class="fas fa-history"></i> Activity Logs</h2>
+            <div class="table-container">
+                <table id="logsTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Action</th>
+                            <th>API Key</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button onclick="refreshData()" class="btn-action">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button onclick="exportData()" class="btn-action">
+                <i class="fas fa-download"></i> Export JSON
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        
+        async function loadData() {
+            try {
+                // Load stats
+                const statsRes = await fetch(API_BASE + '/stats');
+                const stats = await statsRes.json();
+                displayStats(stats);
+                
+                // Load keys
+                const keysRes = await fetch(API_BASE + '/keys');
+                const keys = await keysRes.json();
+                displayKeys(keys);
+                
+                // Load logs
+                const logsRes = await fetch(API_BASE + '/logs');
+                const logs = await logsRes.json();
+                displayLogs(logs);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Failed to load database data');
+            }
+        }
+        
+        function displayStats(stats) {
+            const statsHtml = `
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div class="stat-card" style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 10px; min-width: 150px;">
+                        <h3 style="color: #3b82f6; margin: 0 0 10px 0;">Total Keys</h3>
+                        <div style="font-size: 2rem; font-weight: bold;">${stats.total || 0}</div>
+                    </div>
+                    <div class="stat-card" style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 10px; min-width: 150px;">
+                        <h3 style="color: #10b981; margin: 0 0 10px 0;">Active</h3>
+                        <div style="font-size: 2rem; font-weight: bold;">${stats.active || 0}</div>
+                    </div>
+                    <div class="stat-card" style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; min-width: 150px;">
+                        <h3 style="color: #ef4444; margin: 0 0 10px 0;">Expired</h3>
+                        <div style="font-size: 2rem; font-weight: bold;">${stats.expired || 0}</div>
+                    </div>
+                    <div class="stat-card" style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 10px; min-width: 150px;">
+                        <h3 style="color: #94a3b8; margin: 0 0 10px 0;">Deleted</h3>
+                        <div style="font-size: 2rem; font-weight: bold;">${stats.deleted || 0}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHtml;
+        }
+        
+        function displayKeys(keys) {
+            const tbody = document.getElementById('keysBody');
+            tbody.innerHTML = '';
+            
+            if (Array.isArray(keys)) {
+                keys.forEach((key, index) => {
+                    const isExpired = new Date(key.expired) < new Date();
+                    const status = key.deleted ? 'deleted' : (isExpired ? 'expired' : 'active');
+                    
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><code>${key.api_key}</code></td>
+                            <td>${new Date(key.expired).toLocaleString()}</td>
+                            <td>${new Date(key.created_at).toLocaleString()}</td>
+                            <td>
+                                <span class="status-badge status-${status}">
+                                    ${status.toUpperCase()}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            }
+        }
+        
+        function displayLogs(logs) {
+            const tbody = document.getElementById('logsBody');
+            tbody.innerHTML = '';
+            
+            if (Array.isArray(logs)) {
+                logs.forEach(log => {
+                    const row = `
+                        <tr>
+                            <td>${new Date(log.time).toLocaleString()}</td>
+                            <td><span class="action-badge ${log.action.toLowerCase()}">${log.action.toUpperCase()}</span></td>
+                            <td><code>${log.api_key ? log.api_key.substring(0, 20) + '...' : 'N/A'}</code></td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            }
+        }
+        
+        async function exportData() {
+            try {
+                const response = await fetch(API_BASE + '/export');
+                const data = await response.json();
+                
+                // Download as JSON file
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `api_database_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Failed to export data');
+            }
+        }
+        
+        function refreshData() {
+            loadData();
+            alert('Data refreshed!');
+        }
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
