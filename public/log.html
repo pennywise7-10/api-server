@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activity Log - API Manager</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .back-button {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-button">
+            <a href="/" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-history"></i> Activity Log</h2>
+            <div id="logTable">
+                <p style="text-align: center; color: var(--gray);">
+                    <i class="fas fa-spinner fa-spin"></i> Loading logs...
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API URL - sesuaikan dengan Vercel URL Anda
+        const API_BASE_URL = 'https://api-server.vercel.app/api';
+        
+        async function loadLogs() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/logs`);
+                const logs = await response.json();
+                displayLogs(logs);
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                document.getElementById('logTable').innerHTML = 
+                    '<p style="color: var(--danger); text-align: center;">Error loading logs. Please check backend connection.</p>';
+            }
+        }
+        
+        function displayLogs(logs) {
+            const logTable = document.getElementById('logTable');
+            
+            if (logs.length === 0) {
+                logTable.innerHTML = '<p class="no-keys">No activity logs available.</p>';
+                return;
+            }
+            
+            let html = `
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Action</th>
+                            <th>API Key</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            // Sort by time (newest first)
+            logs.sort((a, b) => new Date(b.time) - new Date(a.time));
+            
+            logs.forEach(log => {
+                const time = new Date(log.time).toLocaleString();
+                const actionClass = log.action.toLowerCase();
+                const shortKey = log.api_key ? 
+                    (log.api_key.substring(0, 8) + '...' + log.api_key.substring(log.api_key.length - 8)) : 
+                    'N/A';
+                
+                html += `
+                    <tr>
+                        <td><i class="far fa-clock"></i> ${time}</td>
+                        <td><span class="action-badge ${actionClass}">${log.action.toUpperCase()}</span></td>
+                        <td><code>${shortKey}</code></td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            logTable.innerHTML = html;
+        }
+        
+        // Load logs when page loads
+        document.addEventListener('DOMContentLoaded', loadLogs);
+    </script>
+</body>
+</html>
