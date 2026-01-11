@@ -1,0 +1,26 @@
+{
+  "name": "api-key-manager",
+  "version": "1.0.0",
+  "description": "Web-based API Key Management System",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js",
+    "deploy": "git push origin main",
+    "deploy-frontend": "gh-pages -d public"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+  },
+  "engines": {
+    "node": ">=20.x"
+  },
+  "keywords": ["api", "key-manager", "nodejs", "express"],
+  "author": "Pennywise",
+  "license": "MIT"
+}
