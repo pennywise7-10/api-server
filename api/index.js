@@ -5,14 +5,14 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // ==================== MIDDLEWARE ====================
 // FIX CORS - Izinkan semua origin
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: false
 }));
 
 app.use(bodyParser.json());
@@ -21,15 +21,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Handle CORS preflight requests
 app.options('*', cors());
 
-// =========== HAPUS BAGIAN INI SEPENUHNYA ===========
-// app.use(express.static(path.join(__dirname, '../../public')));
-// ===================================================
-
 // ==================== FILE PATHS ====================
 const DATA_FILE = path.join(__dirname, 'data.json');
 const LOG_FILE = path.join(__dirname, 'log.json');
-
-// ... REST OF THE CODE ...
 
 // ==================== HELPER FUNCTIONS ====================
 // Initialize files if not exist
@@ -109,19 +103,33 @@ const addLog = (action, apiKey) => {
     }
 };
 
-// GANTI dengan API-only response:
-app.get('/', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'API Key Management System',
-    endpoints: {
-      docs: 'https://your-project.vercel.app',
-      validate: 'GET /api/get/:api_key',
-      add: 'POST /api/add',
-      list: 'GET /api/keys',
-      delete: 'POST /api/deleted/:api_key'
-    }
-  });
+// ==================== ROUTES ====================
+
+// Root API endpoint
+app.get('/api', (req, res) => {
+    res.json({
+        status: 'ok',
+        message: 'API Key Management System',
+        timestamp: new Date().toISOString(),
+        endpoints: {
+            health: '/api/health',
+            keys: '/api/keys',
+            validate: 'GET /api/get/:api_key',
+            add: 'POST /api/add',
+            mark_deleted: 'POST /api/deleted/:api_key',
+            delete: 'DELETE /api/delete/:api_key',
+            logs: '/api/logs'
+        }
+    });
+});
+
+// Health check
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        message: 'API is running',
+        timestamp: new Date().toISOString()
+    });
 });
 
 // Get all keys
@@ -371,9 +379,16 @@ app.use((err, req, res, next) => {
     });
 });
 
-// ==================== START SERVER ====================
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🌐 API URL: http://localhost:${PORT}/api`);
-    console.log(`📊 Web Interface: http://localhost:${PORT}`);
-});
+// ==================== VERCEL EXPORT ====================
+// Ekspor app untuk Vercel (SANGAT PENTING!)
+module.exports = app;
+
+// Hapus app.listen() untuk local development saja
+// Biarkan ini untuk running lokal jika perlu
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`🌐 API URL: http://localhost:${PORT}/api`);
+    });
+        }
