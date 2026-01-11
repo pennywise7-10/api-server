@@ -5,9 +5,7 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
-    "dev": "nodemon api/index.js",
-    "deploy": "git push origin main",
-    "deploy-frontend": "gh-pages -d public"
+    "dev": "nodemon api/index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -15,12 +13,17 @@
     "body-parser": "^1.20.2"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.0.1"
   },
   "engines": {
-    "node": ">=20.x"
+    "node": ">=18.x"
   },
-  "keywords": ["api", "key-manager", "nodejs", "express"],
+  "keywords": [
+    "api",
+    "key-manager",
+    "nodejs",
+    "express"
+  ],
   "author": "Pennywise",
   "license": "MIT"
 }
