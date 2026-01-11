@@ -21,15 +21,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Handle CORS preflight requests
 app.options('*', cors());
 
+// =========== HAPUS BAGIAN INI SEPENUHNYA ===========
+// app.use(express.static(path.join(__dirname, '../../public')));
+// ===================================================
 
 // ==================== FILE PATHS ====================
-// HAPUS LINE 19 (static files):
-// app.use(express.static(path.join(__dirname, '../../public')));
-
-// PERBAIKI juga file paths (LINE 23-24):
 const DATA_FILE = path.join(__dirname, 'data.json');
 const LOG_FILE = path.join(__dirname, 'log.json');
-// Ini sudah BENAR
+
+// ... REST OF THE CODE ...
 
 // ==================== HELPER FUNCTIONS ====================
 // Initialize files if not exist
