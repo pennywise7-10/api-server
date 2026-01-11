@@ -21,12 +21,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Handle CORS preflight requests
 app.options('*', cors());
 
-// Serve static files from public folder
-app.use(express.static(path.join(__dirname, '../public')));
 
 // ==================== FILE PATHS ====================
+// HAPUS LINE 19 (static files):
+// app.use(express.static(path.join(__dirname, '../../public')));
+
+// PERBAIKI juga file paths (LINE 23-24):
 const DATA_FILE = path.join(__dirname, 'data.json');
 const LOG_FILE = path.join(__dirname, 'log.json');
+// Ini sudah BENAR
 
 // ==================== HELPER FUNCTIONS ====================
 // Initialize files if not exist
@@ -106,27 +109,19 @@ const addLog = (action, apiKey) => {
     }
 };
 
-// ==================== ROUTES ====================
-
-// Root route - serve index.html
+// GANTI dengan API-only response:
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
-// Log page - serve log.html
-app.get('/log', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/log.html'));
-});
-
-// ==================== API ROUTES ====================
-
-// Health check
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        message: 'API is running',
-        timestamp: new Date().toISOString()
-    });
+  res.json({
+    status: 'ok',
+    message: 'API Key Management System',
+    endpoints: {
+      docs: 'https://your-project.vercel.app',
+      validate: 'GET /api/get/:api_key',
+      add: 'POST /api/add',
+      list: 'GET /api/keys',
+      delete: 'POST /api/deleted/:api_key'
+    }
+  });
 });
 
 // Get all keys
