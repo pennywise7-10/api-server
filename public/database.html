@@ -35,6 +35,174 @@
             font-size: 0.8rem;
             font-weight: bold;
         }
+
+        /* ===== STYLE UNTUK BUTTONS ===== */
+
+/* Container untuk actions buttons */
+.actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Base button style */
+.btn-action {
+    flex: 1;
+    min-width: 200px;
+    padding: 18px 25px;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border: 2px solid rgba(96, 165, 250, 0.3);
+    border-radius: 16px;
+    color: #e2e8f0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover effect */
+.btn-action:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #60a5fa;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* Active/Click effect */
+.btn-action:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+/* Icon inside buttons */
+.btn-action i {
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+/* Icon animation on hover */
+.btn-action:hover i {
+    transform: scale(1.1);
+}
+
+/* Specific button colors */
+.btn-action.refresh-btn:hover {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #34d399;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.btn-action.export-btn:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: #a78bfa;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+}
+
+/* Ripple effect (optional) */
+.btn-action::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.btn-action:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .actions {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        min-width: 100%;
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+    
+    .btn-action i {
+        font-size: 1.2rem;
+    }
+}
+
+/* ===== LOADING ANIMATION FOR REFRESH ===== */
+.btn-action.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== PULSE ANIMATION FOR NOTIFICATION ===== */
+.btn-action.has-update {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+/* ===== BADGE NOTIFICATION ===== */
+.btn-action .badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+            }
         .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .status-expired { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
         .status-deleted { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
